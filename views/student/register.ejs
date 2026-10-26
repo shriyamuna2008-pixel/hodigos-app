@@ -1,0 +1,15 @@
+<%- include('../partials/s-top') %>
+<div class="card raised auth">
+  <h1>Create your account</h1>
+  <p class="muted small" style="margin:6px 0 16px">You'll get an application number right away.</p>
+  <% if (locals.error) { %><div class="banner bad"><span class="grow"><%= error %></span></div><% } %>
+  <form method="post" action="/register" class="stack" style="gap:12px">
+    <label class="f">Full name (as on marksheet)<input type="text" name="name" value="<%= form.name || '' %>" required autocomplete="name"></label>
+    <label class="f">Email<input type="email" name="email" value="<%= form.email || '' %>" required autocomplete="email"></label>
+    <label class="f">Password (8+ characters)<input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+    <label class="f">Confirm password<input type="password" name="confirm" required minlength="8" autocomplete="new-password"></label>
+    <button class="btn primary block">Create account</button>
+  </form>
+  <p class="small muted" style="margin-top:14px">Already registered? <a href="/login">Log in</a></p>
+</div>
+<%- include('../partials/s-bottom') %>

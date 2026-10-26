@@ -1,0 +1,79 @@
+<%- include('../partials/s-top') %>
+<% const u = currentUser; %>
+<div class="grid2">
+<div class="stack" style="min-width:0">
+  <div><div class="eyebrow">Application <%= C.appNo(u.id) %></div><h1>Seat allotment</h1></div>
+
+  <% if (!latest) { %>
+    <div class="card"><h3>Round 1 has not been published yet</h3>
+      <p class="muted" style="margin-top:6px;max-width:62ch">When the counselling office runs Round 1, all states are processed together against one shared seat list. You will get the highest choice on your list that your merit reaches.</p>
+      <% if (!u.prefs_locked) { %><div class="banner warn" style="margin:14px 0 0"><span class="grow">Your preferences are not locked. Only locked lists take part.</span><a class="btn sm" href="/preferences">Go to preferences</a></div><% } %>
+    </div>
+  <% } else if (!u.prefs_locked && !seat) { %>
+    <div class="card"><h3>You did not take part in this round</h3><p class="muted" style="margin-top:6px">Your preferences were not locked when Round <%= latest %> ran.</p></div>
+  <% } else if (!seat) { %>
+    <div class="card"><div class="eyebrow">Round <%= latest %></div><h3 style="margin-top:4px">No seat this round</h3>
+      <p class="muted" style="margin-top:6px;max-width:62ch"><%= latest === 1 ? 'Your score did not reach any of your choices. You stay in Round 2 automatically with your full list; seats freed by withdrawals and upgrades will be offered again.' : (r1 ? 'Your Round 1 seat was cancelled because no decision or fee was recorded, or you withdrew.' : 'Your score did not reach any of your choices in the final round.') %></p></div>
+  <% } else { const upgraded = latest === 2 && r1 && (r1.program_id !== seat.program_id); %>
+    <div class="card raised seatcard">
+      <div class="row between"><span class="eyebrow">Your seat · <%= latest === 2 ? 'Final (Round 2)' : 'Round 1' %></span><% if (upgraded) { %><span class="chip ok">Upgraded from choice <%= r1.pref_rank %></span><% } %></div>
+      <div class="prog-name"><%= seat.program %></div>
+      <p class="muted"><%= seat.college %> · <%= seat.city %>, <%= seat.state %></p>
+      <div class="ticket">
+        <div><div class="eyebrow">Choice</div><b class="num"><%= seat.pref_rank %></b></div>
+        <div><div class="eyebrow">Quota</div><b><%= C.QUOTAS[seat.quota] %></b></div>
+        <div><div class="eyebrow">Your score</div><b class="num"><%= seat.score.toFixed(2) %></b></div>
+        <div><div class="eyebrow">Fee</div><b><%= payment ? 'Paid · ' + payment.ref : 'Not paid' %></b></div>
+      </div>
+    </div>
+
+    <% if (phase === 'round1' && latest === 1) { const d = decision && decision.decision; %>
+      <div class="card">
+        <div class="panel-title"><h3>Choose what happens next</h3>
+          <% if (d) { %><span class="chip <%= d==='withdraw' ? 'bad' : (payment ? 'ok' : 'warn') %>"><%= d[0].toUpperCase()+d.slice(1) %><%= d!=='withdraw' && !payment ? ' · fee pending' : '' %></span><% } else { %><span class="chip warn">Decision pending</span><% } %></div>
+        <% if (d === 'withdraw') { %>
+          <p class="muted">You have withdrawn. Your seat goes back to the pool in Round 2.</p>
+        <% } else { %>
+        <form method="post" action="/allotment/decision" class="stack">
+          <div class="opts" role="radiogroup" aria-label="Seat decision">
+            <label class="opt"><input type="radio" name="decision" value="freeze" <%= d==='freeze'?'checked':'' %> required><b>Freeze</b><span>Accept this seat. You are done.</span></label>
+            <label class="opt"><input type="radio" name="decision" value="float" <%= d==='float'?'checked':'' %> <%= canFloat?'':'disabled' %>><b>Float</b><span><%= canFloat ? 'Keep this seat; move up to any higher choice that opens.' : 'This is already your top choice.' %></span></label>
+            <label class="opt"><input type="radio" name="decision" value="slide" <%= d==='slide'?'checked':'' %> <%= canSlide?'':'disabled' %>><b>Slide</b><span><%= canSlide ? 'Keep this seat; move up only within this college.' : 'No higher choice at this college.' %></span></label>
+            <label class="opt"><input type="radio" name="decision" value="withdraw"><b style="color:var(--bad)">Withdraw</b><span>Give up this seat and leave counselling.</span></label>
+          </div>
+          <label class="small row" style="gap:8px;flex-wrap:nowrap;align-items:flex-start"><input type="checkbox" name="confirm" value="yes"> <span>If withdrawing: I understand this releases my seat and cannot be undone.</span></label>
+          <div class="row"><button class="btn primary">Save decision</button><% if (!payment) { %><a class="btn" href="/pay">Pay seat fee (<%= C.inr(C.SEAT_FEE) %>)</a><% } %></div>
+        </form>
+        <div class="banner warn" style="margin:14px 0 0"><span class="grow small"><b>Important:</b> if no decision and fee are recorded before Round 2 runs, your seat is cancelled.</span></div>
+        <% } %>
+      </div>
+    <% } else if (latest === 2) { %>
+      <div class="banner <%= payment ? 'ok' : 'warn' %>"><span class="grow small"><% if (payment) { %><b>Allotment confirmed.</b> Report to the college with your original documents and fee receipt (<%= payment.ref %>).<% } else { %><b>Pay the seat acceptance fee to confirm this seat.</b><% } %></span><% if (!payment) { %><a class="btn sm primary" href="/pay">Pay <%= C.inr(C.SEAT_FEE) %></a><% } %></div>
+    <% } %>
+  <% } %>
+
+  <% if (explain.length) { %>
+    <div class="card">
+      <div class="panel-title"><h3>How your Round <%= latest %> result was decided</h3><span class="small muted">Your score <b class="num"><%= score.toFixed(2) %></b></span></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th class="n">#</th><th>Choice</th><th>Closing score (your quotas)</th><th>Result</th></tr></thead>
+        <tbody>
+        <% explain.forEach(e => { %>
+          <tr class="<%= e.cls === 'ok' ? 'me' : '' %>"><td class="n"><%= e.rank %></td><td><%= e.program %><br><span class="small muted"><%= e.college %></span></td>
+            <td class="small mono"><%= e.parts.map(p => ({O:'Open',H:'HS',R:'Res'})[p.q] + ' ' + (p.cap === 0 ? 'no seats' : p.close == null ? 'vacant' : p.close.toFixed(2))).join(' · ') %></td>
+            <td><span class="chip <%= e.cls %>"><%= e.verdict %></span></td></tr>
+        <% }) %>
+        </tbody></table></div>
+    </div>
+  <% } %>
+</div>
+<aside class="stack">
+  <div class="card small"><h3>Seat options</h3><ul class="checks" style="margin-top:10px">
+    <li><span class="chip acc">Freeze</span><span>Happy with this seat.</span></li>
+    <li><span class="chip acc">Float</span><span>Keep the seat as a safety net; move to any higher choice.</span></li>
+    <li><span class="chip acc">Slide</span><span>Keep the seat; move only to a higher program at the same college.</span></li>
+    <li><span class="chip bad">Withdraw</span><span>Release the seat. Cannot be undone.</span></li></ul>
+    <p class="muted" style="margin-top:10px">With Float or Slide you never lose your current seat: you keep top priority on it in Round 2.</p></div>
+</aside>
+</div>
+<%- include('../partials/s-bottom') %>

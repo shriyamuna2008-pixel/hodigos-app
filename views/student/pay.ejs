@@ -1,0 +1,17 @@
+<%- include('../partials/s-top') %>
+<div class="card raised auth" style="max-width:480px">
+  <div class="eyebrow">Secure payment · test mode</div>
+  <h1 style="margin-top:4px">Seat acceptance fee</h1>
+  <div class="kv" style="margin:16px 0">
+    <span>Applicant</span><span><%= C.appNo(currentUser.id) %></span>
+    <span>Seat</span><span style="font-family:var(--f-body)"><%= seat.program %>, <%= seat.college %></span>
+    <span>Amount</span><span><%= C.inr(fee) %></span>
+  </div>
+  <form method="post" action="/pay" class="stack" style="gap:12px">
+    <label class="f">Card number (test mode, not charged)<input type="text" inputmode="numeric" placeholder="4111 1111 1111 1111" value="4111 1111 1111 1111" readonly></label>
+    <button class="btn primary block">Pay <%= C.inr(fee) %></button>
+  </form>
+  <p class="small muted" style="margin-top:12px">This portal runs payments in test mode. Connect a gateway such as Razorpay before taking real fees.</p>
+  <a class="btn sm" style="margin-top:12px" href="/allotment">Back</a>
+</div>
+<%- include('../partials/s-bottom') %>

@@ -1,0 +1,29 @@
+<%- include('../partials/s-top') %>
+<% const u = currentUser, dis = u.prefs_locked ? 'disabled' : ''; %>
+<div class="grid2">
+  <div class="card" style="min-width:0">
+    <div class="panel-title"><h1>Profile</h1><% if (u.prefs_locked) { %><span class="chip warn">Locked with preferences</span><% } %></div>
+    <form method="post" action="/profile" class="stack">
+      <div class="fields">
+        <label class="f">Full name<input type="text" name="name" value="<%= u.name %>" required <%= dis %>></label>
+        <label class="f">Phone<input type="tel" name="phone" value="<%= u.phone || '' %>" <%= dis %>></label>
+        <label class="f">Date of birth<input type="date" name="dob" value="<%= u.dob ? new Date(u.dob).toISOString().slice(0,10) : '' %>" required <%= dis %>></label>
+        <label class="f">Home state (domicile)
+          <select name="home_state" required <%= dis %>><option value="">Choose…</option><% STATES.forEach(s => { %><option <%= u.home_state===s?'selected':'' %>><%= s %></option><% }) %></select></label>
+        <label class="f">Category
+          <select name="category" <%= dis %>><option value="GEN" <%= u.category==='GEN'?'selected':'' %>>General</option><option value="RES" <%= u.category==='RES'?'selected':'' %>>Reserved</option></select></label>
+        <label class="f">Class 12 board %<input type="number" name="board_pct" min="0" max="100" step="0.01" value="<%= u.board_pct ?? '' %>" required <%= dis %>></label>
+        <label class="f">Entrance exam percentile<input type="number" name="entrance_pct" min="0" max="100" step="0.01" value="<%= u.entrance_pct ?? '' %>" required <%= dis %>></label>
+      </div>
+      <% if (!u.prefs_locked) { %><div><button class="btn primary">Save profile</button></div><% } %>
+    </form>
+  </div>
+  <aside class="stack">
+    <div class="card small"><h3>Why we ask</h3><ul class="checks" style="margin-top:8px">
+      <li>Merit score = 0.7 × entrance percentile + 0.3 × board %.</li>
+      <li>Home state gives access to that state's Home State quota and wins ties.</li>
+      <li>Reserved category gives access to the Reserved quota. Upload the certificate.</li>
+      <li>Your marks are checked against your uploaded documents.</li></ul></div>
+  </aside>
+</div>
+<%- include('../partials/s-bottom') %>

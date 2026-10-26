@@ -1,0 +1,29 @@
+# Render Blueprint: creates the web app + a free PostgreSQL database in one click.
+services:
+  - type: web
+    name: hodigos
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hodigos-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@hodigos.in
+      - key: ADMIN_PASSWORD
+        sync: false   # Render asks you to type this when you create the Blueprint
+
+databases:
+  - name: hodigos-db
+    plan: free
+    databaseName: hodigos

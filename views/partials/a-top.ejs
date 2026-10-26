@@ -1,0 +1,21 @@
+<%- include('head') %>
+<body class="admin">
+<aside class="side">
+  <a class="brand" href="/admin"><%- include('logo') %><span><b>Hodigos</b><small>Counselling admin</small></span></a>
+  <% const a = locals.active; %>
+  <nav aria-label="Admin">
+    <a href="/admin" class="<%= a==='dashboard'?'on':'' %>">Dashboard</a>
+    <a href="/admin/colleges" class="<%= a==='colleges'?'on':'' %>">Colleges &amp; seats</a>
+    <a href="/admin/applicants" class="<%= a==='applicants'?'on':'' %>">Applicants</a>
+    <a href="/admin/counselling" class="<%= a==='counselling'?'on':'' %>">Counselling rounds</a>
+    <a href="/admin/results" class="<%= a==='results'?'on':'' %>">Results</a>
+    <a href="/admin/audit" class="<%= a==='audit'?'on':'' %>">Audit log</a>
+  </nav>
+  <div class="foot">
+    <span>Phase: <b style="color:var(--side-ink)"><%= C.PHASES[phase] %></b></span>
+    <span><%= currentUser.email %></span>
+    <form method="post" action="/admin/logout"><button class="btn sm">Log out</button></form>
+  </div>
+</aside>
+<main>
+<% if (flash) { %><div class="banner <%= flash.type %>" role="status"><span class="grow"><%= flash.msg %></span></div><% } %>

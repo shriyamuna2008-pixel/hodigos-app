@@ -1,0 +1,46 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><div><div class="eyebrow"><a href="/admin/applicants">Applicants</a> · <%= C.appNo(s.id) %></div><h1><%= s.name %></h1></div>
+  <span class="chip <%= s.prefs_locked ? 'ok' : '' %>"><%= s.prefs_locked ? 'Preferences locked' : 'Draft' %></span></div>
+<div class="grid2">
+  <div class="stack" style="min-width:0">
+    <div class="card">
+      <div class="panel-title"><h3>Documents</h3><span class="chip <%= st.docsVerified ? 'ok' : 'warn' %>"><%= st.docsVerified ? 'All verified' : 'Incomplete' %></span></div>
+      <% st.requiredDocs.forEach(d => { const doc = st.docs[d.key]; %>
+        <div class="doc">
+          <div style="min-width:0"><b><%= d.name %></b>
+            <div class="small muted"><% if (doc) { %><% if (doc.filename !== 'sample-record') { %><a href="/admin/documents/<%= doc.id %>/file" target="_blank" rel="noopener">Open <%= doc.filename %></a><% } else { %>sample record<% } %> · <%= new Date(doc.uploaded_at).toLocaleString('en-IN') %><% } else { %>Not uploaded<% } %></div>
+            <% if (doc && doc.status === 'rejected') { %><div class="small" style="color:var(--bad)">Rejected: <%= doc.note %></div><% } %></div>
+          <span class="chip <%= !doc ? '' : doc.status==='verified' ? 'ok' : doc.status==='rejected' ? 'bad' : 'warn' %>"><%= !doc ? 'Missing' : doc.status==='pending' ? 'To review' : doc.status %></span>
+          <% if (doc && doc.status !== 'verified' && !s.prefs_locked) { %>
+            <form method="post" action="/admin/documents/<%= doc.id %>/review">
+              <button class="btn sm primary" name="action" value="verify">Verify</button>
+              <input type="text" name="note" placeholder="Reason if rejecting, e.g. seal unclear" style="flex:1;min-width:180px" aria-label="Rejection reason">
+              <button class="btn sm danger" name="action" value="reject">Reject</button>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+    <div class="card"><h3>Preferences</h3>
+      <% if (!prefs.length) { %><p class="small muted" style="margin-top:6px">No choices yet.</p><% } else { %>
+      <ol style="margin:10px 0 0;padding-left:22px;font-size:.9rem;display:flex;flex-direction:column;gap:4px"><% prefs.forEach(p => { %><li><%= p.program %> · <span class="muted"><%= p.college %>, <%= p.state %></span></li><% }) %></ol><% } %>
+    </div>
+    <% if (allots.length) { %><div class="card"><h3>Allotments</h3>
+      <% allots.forEach(a => { %><p style="margin-top:8px"><b>Round <%= a.round %>:</b> <%= a.program %>, <%= a.college %> · <%= C.QUOTAS[a.quota] %> · choice <%= a.pref_rank %></p><% }) %>
+      <p class="small muted" style="margin-top:8px">Decision: <%= decision ? decision.decision : 'none' %> · Fee: <%= payment ? 'paid (' + payment.ref + ')' : 'not paid' %></p></div><% } %>
+  </div>
+  <aside class="card">
+    <h3>Profile</h3>
+    <div class="kv" style="margin-top:10px">
+      <span>Email</span><span style="font-family:var(--f-body);overflow-wrap:anywhere"><%= s.email %></span>
+      <span>Phone</span><span><%= s.phone || '—' %></span>
+      <span>Date of birth</span><span><%= s.dob ? new Date(s.dob).toLocaleDateString('en-IN') : '—' %></span>
+      <span>Home state</span><span><%= s.home_state || '—' %></span>
+      <span>Category</span><span><%= s.category %></span>
+      <span>Board %</span><span><%= s.board_pct ?? '—' %></span>
+      <span>Entrance pct.</span><span><%= s.entrance_pct ?? '—' %></span>
+      <span>Merit score</span><span><b><%= st.score == null ? '—' : st.score.toFixed(2) %></b></span>
+    </div>
+  </aside>
+</div>
+<%- include('../partials/a-bottom') %>

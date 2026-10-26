@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<body class="student">
+<main class="wrap">
+  <div class="card raised auth" style="margin-top:8vh">
+    <div class="row" style="gap:10px"><%- include('../partials/logo') %><div><b style="font-family:var(--f-display);font-size:1.2rem">Hodigos</b><div class="small muted">Counselling administrator portal</div></div></div>
+    <h1 style="margin-top:18px">Admin login</h1>
+    <% if (locals.error) { %><div class="banner bad" style="margin-top:12px"><span class="grow"><%= error %></span></div><% } %>
+    <% if (flash) { %><div class="banner <%= flash.type %>" style="margin-top:12px"><span class="grow"><%= flash.msg %></span></div><% } %>
+    <form method="post" action="/admin/login" class="stack" style="gap:12px;margin-top:16px">
+      <label class="f">Email<input type="email" name="email" value="<%= email %>" required autocomplete="username"></label>
+      <label class="f">Password<input type="password" name="password" required autocomplete="current-password"></label>
+      <button class="btn primary block">Log in</button>
+    </form>
+    <p class="small muted" style="margin-top:14px">Students: <a href="/login">log in here</a>.</p>
+  </div>
+</main>
+</body></html>

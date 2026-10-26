@@ -1,0 +1,47 @@
+<%- include('../partials/a-top') %>
+<% const ph = C.PHASE_ORDER.indexOf(phase); const decMap = Object.fromEntries(dec.map(d => [d.decision, d.n])); %>
+<div class="pagehead"><h1>Counselling rounds</h1><span class="chip cmp"><%= C.PHASES[phase] %></span></div>
+<div class="grid2">
+  <div class="card" style="min-width:0">
+    <ol class="steps">
+      <li class="step <%= ph > 0 ? 'done' : 'now' %>"><span class="n"><%= ph > 0 ? '✓' : 1 %></span><div class="c">
+        <b>Freeze seat matrix &amp; open choice filling</b>
+        <% if (ph > 0) { %><span class="small muted">Frozen <%= frozenAt ? new Date(frozenAt).toLocaleString('en-IN') : '' %> · <%= k.seats %> seats</span>
+        <% } else { %><span class="small muted">Locks all seat counts (SOP 1) and lets students lock their preferences. <%= k.seats %> seats configured.</span>
+          <form method="post" action="/admin/counselling/freeze"><button class="btn primary sm">Freeze &amp; open choice filling</button></form><% } %></div></li>
+
+      <li class="step <%= ph > 1 ? 'done' : ph === 1 ? 'now' : '' %>"><span class="n"><%= ph > 1 ? '✓' : 2 %></span><div class="c">
+        <b>Run Round 1</b>
+        <% if (runs[1]) { %><span class="small muted"><%= runs[1].allotted %> of <%= runs[1].participants %> applicants allotted · <a href="/admin/results?round=1">results</a></span>
+        <% } else { %><span class="small muted"><%= k.locked %> applicants with locked preferences will take part<%= k.unlocked ? '; ' + k.unlocked + ' with unlocked lists will be left out' : '' %>. This closes choice filling.</span>
+          <% if (ph === 1) { %><form method="post" action="/admin/counselling/run/1"><button class="btn primary sm" <%= k.locked ? '' : 'disabled' %>>Run Round 1 allotment</button></form><% } %><% } %></div></li>
+
+      <li class="step <%= ph > 2 ? 'done' : ph === 2 ? 'now' : '' %>"><span class="n"><%= ph > 2 ? '✓' : 3 %></span><div class="c">
+        <b>Seat decisions &amp; fee payment</b>
+        <% if (ph >= 2) { %><span class="small muted">Freeze <%= decMap.freeze || 0 %> · Float <%= decMap.float || 0 %> · Slide <%= decMap.slide || 0 %> · Withdraw <%= decMap.withdraw || 0 %> · Fee paid <%= r1paid %> of <%= r1seats %>. Seats without a decision and fee are cancelled in Round 2.</span>
+        <% } else { %><span class="small muted">Students with a Round 1 seat choose Freeze, Float, Slide or Withdraw and pay the seat fee.</span><% } %></div></li>
+
+      <li class="step <%= ph > 2 ? 'done' : '' %>"><span class="n"><%= ph > 2 ? '✓' : 4 %></span><div class="c">
+        <b>Run Round 2 (final)</b>
+        <% if (runs[2]) { %><span class="small muted"><%= runs[2].allotted %> seats in the final list · <a href="/admin/results?round=2">results</a></span>
+        <% } else { %><span class="small muted">Offers withdrawn and cancelled seats again and processes Float/Slide upgrades. Students keep their current seat if nothing better opens.</span>
+          <% if (ph === 2) { %><form method="post" action="/admin/counselling/run/2"><button class="btn primary sm">Run Round 2 allotment</button></form><% } %><% } %></div></li>
+    </ol>
+  </div>
+  <aside class="stack">
+    <div class="card">
+      <h3>Sample applicants</h3>
+      <p class="small muted" style="margin:6px 0 10px">Add test applicants with verified documents and locked preferences so rounds have competition. <%= k.samples %> currently.</p>
+      <% if (ph <= 1) { %>
+        <form method="post" action="/admin/counselling/samples" class="row" style="flex-wrap:nowrap"><input type="number" name="n" value="60" min="1" max="300" style="width:90px" aria-label="How many"><button class="btn sm">Add sample applicants</button></form>
+        <% if (k.samples) { %><form method="post" action="/admin/counselling/samples/delete" style="margin-top:8px"><button class="btn sm danger">Remove all sample applicants</button></form><% } %>
+      <% } else { %><p class="small muted">Available before Round 1.</p><% } %>
+    </div>
+    <div class="card">
+      <h3>Reset counselling</h3>
+      <p class="small muted" style="margin:6px 0 10px">Deletes all round results, decisions and payments, unfreezes the seat matrix and unlocks student preferences. Accounts, documents and seat counts are kept.</p>
+      <form method="post" action="/admin/counselling/reset" class="stack" style="gap:8px"><input type="text" name="confirm" placeholder="Type RESET to confirm" aria-label="Type RESET to confirm"><button class="btn sm danger">Reset counselling</button></form>
+    </div>
+  </aside>
+</div>
+<%- include('../partials/a-bottom') %>

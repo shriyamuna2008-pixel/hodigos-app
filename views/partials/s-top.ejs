@@ -1,0 +1,26 @@
+<%- include('head') %>
+<body class="student">
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="/"><%- include('logo') %><span><b>Hodigos</b><small>Guide to College</small></span></a>
+    <% if (currentUser && currentUser.role === 'student') { const a = locals.active; %>
+      <nav class="nav" aria-label="Student">
+        <a href="/dashboard" class="<%= a==='dashboard'?'on':'' %>">Dashboard</a>
+        <a href="/profile" class="<%= a==='profile'?'on':'' %>">Profile</a>
+        <a href="/colleges" class="<%= a==='colleges'?'on':'' %>">Colleges</a>
+        <a href="/documents" class="<%= a==='documents'?'on':'' %>">Documents</a>
+        <a href="/preferences" class="<%= a==='preferences'?'on':'' %>">Preferences</a>
+        <a href="/allotment" class="<%= a==='allotment'?'on':'' %>">Seat allotment</a>
+      </nav>
+      <div class="who"><b><%= currentUser.name %></b><span class="mono"><%= C.appNo(currentUser.id) %></span></div>
+      <form method="post" action="/logout" class="inline"><button class="btn sm">Log out</button></form>
+    <% } else { %>
+      <a class="btn sm" href="/login">Log in</a><a class="btn sm primary" href="/register">Register</a>
+    <% } %>
+  </div>
+</header>
+<main class="wrap">
+<% if (currentUser && currentUser.role === 'student') { %>
+  <div class="phasebar"><span class="pdot"></span>Counselling status: <b><%= C.PHASES[phase] %></b></div>
+<% } %>
+<% if (flash) { %><div class="banner <%= flash.type %>" role="status"><span class="grow"><%= flash.msg %></span></div><% } %>

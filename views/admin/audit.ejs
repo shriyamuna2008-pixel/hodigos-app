@@ -1,0 +1,7 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><h1>Audit log</h1><span class="small muted">Latest 300 actions</span></div>
+<div class="tablewrap"><table>
+  <thead><tr><th>Time</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead>
+  <tbody><% rows.forEach(r => { %><tr><td class="mono small" style="white-space:nowrap"><%= new Date(r.at).toLocaleString('en-IN') %></td><td class="small"><%= r.actor %></td><td><%= r.action.replace(/_/g,' ') %></td><td class="small muted"><%= r.detail %></td></tr><% }) %></tbody>
+</table></div>
+<%- include('../partials/a-bottom') %>

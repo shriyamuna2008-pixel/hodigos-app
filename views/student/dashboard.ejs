@@ -1,0 +1,48 @@
+<%- include('../partials/s-top') %>
+<% const u = currentUser;
+   const ph = C.PHASE_ORDER.indexOf(phase);
+   const steps = [
+     { t:'Complete your profile', ok: st.profileComplete, href:'/profile', note: st.profileComplete ? 'Marks, home state and category saved.' : 'Add your marks, home state, category and date of birth.' },
+     { t:'Upload documents', ok: st.docsUploaded, href:'/documents', note: st.docsUploaded ? 'All required documents uploaded.' : 'Upload ' + st.requiredDocs.length + ' required documents.' },
+     { t:'Documents verified', ok: st.docsVerified, href:'/documents', note: st.docsRejected ? st.docsRejected + ' document(s) rejected. Re-upload them.' : st.docsVerified ? 'Verified by the counselling office.' : 'Waiting for the counselling office to review.' },
+     { t:'Fill and lock preferences', ok: u.prefs_locked, href:'/preferences', note: u.prefs_locked ? st.prefCount + ' choices locked.' : (phase==='setup' ? 'You can draft your list now. Locking opens with choice filling.' : st.prefCount + ' choices added. Lock before Round 1.') },
+     { t:'Round 1 result & seat decision', ok: ph >= 2 && (!allot || !!decision), href:'/allotment', note: ph < 2 ? 'Published by the counselling office after choice filling closes.' : (allot ? (decision ? 'Decision: ' + decision.decision + (payment ? ' · fee paid' : ' · fee not paid') : 'Choose Freeze, Float, Slide or Withdraw.') : 'See your result.') },
+     { t:'Final allotment', ok: ph >= 3, href:'/allotment', note: ph >= 3 ? 'Round 2 published.' : 'Round 2 frees withdrawn seats and processes upgrades.' },
+   ];
+   const nowIdx = steps.findIndex(s => !s.ok); %>
+<div class="grid2">
+  <div class="stack" style="min-width:0">
+    <div><div class="eyebrow">Welcome back</div><h1><%= u.name %></h1></div>
+    <% if (allot) { %>
+      <div class="card raised">
+        <div class="eyebrow">Your seat · Round <%= allot.round %></div>
+        <div style="font-family:var(--f-display);font-size:1.4rem;font-weight:800;margin-top:4px"><%= allot.program %></div>
+        <p class="muted"><%= allot.college %> · <%= C.QUOTAS[allot.quota] %> · choice <%= allot.pref_rank %></p>
+        <a class="btn sm" style="margin-top:10px" href="/allotment">View details</a>
+      </div>
+    <% } %>
+    <div class="card">
+      <h2 style="margin-bottom:14px">Your application</h2>
+      <ol class="steps">
+        <% steps.forEach((s, i) => { %>
+          <li class="step <%= s.ok ? 'done' : (i === nowIdx ? 'now' : '') %>"><span class="n"><%= s.ok ? '✓' : i + 1 %></span>
+            <div class="c"><b><a href="<%= s.href %>" style="color:inherit"><%= s.t %></a></b><span class="small muted"><%= s.note %></span></div></li>
+        <% }) %>
+      </ol>
+    </div>
+  </div>
+  <aside class="stack">
+    <div class="card">
+      <div class="eyebrow">Composite merit score</div>
+      <div class="bigscore num" style="margin:6px 0 12px"><%= st.score == null ? '—' : st.score.toFixed(2) %></div>
+      <div class="kv">
+        <span>Entrance percentile × 0.7</span><span><%= u.entrance_pct == null ? '—' : (0.7*u.entrance_pct).toFixed(2) %></span>
+        <span>Board % × 0.3</span><span><%= u.board_pct == null ? '—' : (0.3*u.board_pct).toFixed(2) %></span>
+        <span>Home state</span><span><%= u.home_state || '—' %></span>
+        <span>Category</span><span><%= u.category === 'RES' ? 'Reserved' : 'General' %></span>
+      </div>
+    </div>
+    <div class="card small"><h3>How ties are broken</h3><p class="muted" style="margin-top:6px">Equal scores at a college go to the applicant whose home state is that college's state, then to the older applicant.</p></div>
+  </aside>
+</div>
+<%- include('../partials/s-bottom') %>

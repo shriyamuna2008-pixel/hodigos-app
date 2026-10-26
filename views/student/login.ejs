@@ -1,0 +1,12 @@
+<%- include('../partials/s-top') %>
+<div class="card raised auth">
+  <h1>Student login</h1>
+  <% if (locals.error) { %><div class="banner bad" style="margin-top:12px"><span class="grow"><%= error %></span></div><% } %>
+  <form method="post" action="/login" class="stack" style="gap:12px;margin-top:16px">
+    <label class="f">Email<input type="email" name="email" value="<%= email %>" required autocomplete="email"></label>
+    <label class="f">Password<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn primary block">Log in</button>
+  </form>
+  <p class="small muted" style="margin-top:14px">New here? <a href="/register">Create an account</a></p>
+</div>
+<%- include('../partials/s-bottom') %>

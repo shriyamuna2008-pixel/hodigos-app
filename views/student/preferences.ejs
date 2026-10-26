@@ -1,0 +1,56 @@
+<%- include('../partials/s-top') %>
+<% const u = currentUser;
+   const checks = [
+     [phase === 'choice_filling', phase === 'setup' ? 'Choice filling opens after the seat matrix is frozen' : 'Choice filling is open'],
+     [st.profileComplete, 'Profile complete'],
+     [st.docsVerified, 'All documents verified'],
+     [prefs.length > 0, 'At least one choice'],
+   ];
+   const canLock = !u.prefs_locked && checks.every(c => c[0]); %>
+<div class="grid2">
+  <div class="stack" style="min-width:0">
+    <div class="card">
+      <div class="panel-title"><div><h1>Your preference order</h1><p class="small muted">Highest first. You get at most one seat: the highest choice your merit reaches. A higher choice never hurts a lower one.</p></div>
+        <span class="chip <%= u.prefs_locked ? 'ok' : 'warn' %>"><%= u.prefs_locked ? 'Locked' : 'Draft' %></span></div>
+      <% if (!prefs.length) { %><div class="empty">No choices yet. Add programs below or from <a href="/colleges">Colleges</a>.</div><% } %>
+      <ol class="plist">
+        <% prefs.forEach((p, i) => { %>
+          <li class="pitem"><span class="pnum"><%= p.rank %></span>
+            <div style="min-width:0"><b><%= p.program %></b><span class="small muted"><%= p.college %> · <%= p.city %>, <%= p.state %><%= p.state === u.home_state ? ' · home state' : '' %></span></div>
+            <% if (canEdit) { %><div class="row" style="gap:4px;flex-wrap:nowrap">
+              <form method="post" action="/preferences/<%= p.id %>/move" class="inline"><input type="hidden" name="dir" value="up"><button class="icon-btn" <%= i===0?'disabled':'' %> aria-label="Move up">↑</button></form>
+              <form method="post" action="/preferences/<%= p.id %>/move" class="inline"><input type="hidden" name="dir" value="down"><button class="icon-btn" <%= i===prefs.length-1?'disabled':'' %> aria-label="Move down">↓</button></form>
+              <form method="post" action="/preferences/<%= p.id %>/remove" class="inline"><button class="icon-btn" aria-label="Remove">✕</button></form>
+            </div><% } else { %><span></span><% } %>
+          </li>
+        <% }) %>
+      </ol>
+    </div>
+    <% if (canEdit) { %>
+      <div class="card">
+        <h3>Add a program</h3>
+        <form method="post" action="/preferences/add" class="row" style="margin-top:10px;flex-wrap:nowrap">
+          <select name="program_id" required aria-label="Program">
+            <option value="">Choose a program…</option>
+            <% let last = ''; available.forEach(p => { if (p.college !== last) { if (last) { %></optgroup><% } last = p.college; %><optgroup label="<%= p.college %> (<%= p.state %>)"><% } %><option value="<%= p.id %>"><%= p.name %></option><% }); if (last) { %></optgroup><% } %>
+          </select>
+          <button class="btn primary">Add</button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+  <aside class="stack">
+    <div class="card raised">
+      <h3>Lock your choices</h3>
+      <ul class="checks" style="margin:12px 0 14px"><% checks.forEach(([ok, t]) => { %><li><span class="tick <%= ok ? 'y' : 'n' %>"><%= ok ? '✓' : '!' %></span><span><%= t %></span></li><% }) %></ul>
+      <% if (u.prefs_locked) { %>
+        <p class="small muted">Locked on <%= new Date(u.locked_at).toLocaleString('en-IN') %>.</p>
+        <% if (phase === 'choice_filling') { %><form method="post" action="/preferences/unlock" style="margin-top:10px"><button class="btn block">Unlock to edit</button></form><% } %>
+      <% } else { %>
+        <form method="post" action="/preferences/lock"><button class="btn primary block" <%= canLock ? '' : 'disabled' %>>Lock <%= prefs.length %> choice<%= prefs.length === 1 ? '' : 's' %></button></form>
+        <p class="small muted" style="margin-top:8px">Locking also locks your profile and documents. Only locked lists take part in Round 1.</p>
+      <% } %>
+    </div>
+  </aside>
+</div>
+<%- include('../partials/s-bottom') %>

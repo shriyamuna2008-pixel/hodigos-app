@@ -1,0 +1,27 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><h1>Applicants</h1><span class="small muted"><%= rows.length %> shown</span></div>
+<form method="get" class="row" style="margin-bottom:14px">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search name or email" style="max-width:280px" aria-label="Search">
+  <select name="filter" style="max-width:220px" aria-label="Filter">
+    <option value="all" <%= filter==='all'?'selected':'' %>>All applicants</option>
+    <option value="pending" <%= filter==='pending'?'selected':'' %>>Documents to review</option>
+    <option value="locked" <%= filter==='locked'?'selected':'' %>>Preferences locked</option>
+    <option value="real" <%= filter==='real'?'selected':'' %>>Registered (not sample)</option>
+  </select>
+  <button class="btn">Apply</button>
+</form>
+<div class="tablewrap"><table>
+  <thead><tr><th>Application</th><th>Name</th><th>Home state</th><th>Cat.</th><th class="n">Score</th><th>Documents</th><th class="n">Choices</th><th>Status</th></tr></thead>
+  <tbody>
+  <% rows.forEach(u => { const sc = C.meritScore(u); %>
+    <tr><td class="mono small"><a href="/admin/applicants/<%= u.id %>"><%= C.appNo(u.id) %></a></td>
+      <td><a href="/admin/applicants/<%= u.id %>" style="color:inherit"><%= u.name %></a><br><span class="small muted"><%= u.is_sample ? 'sample applicant' : u.email %></span></td>
+      <td class="small"><%= u.home_state || '—' %></td><td class="small"><%= u.category %></td>
+      <td class="n"><%= sc == null ? '—' : sc.toFixed(2) %></td>
+      <td><% if (u.pending) { %><span class="chip warn"><%= u.pending %> to review</span><% } else { %><span class="chip <%= u.verified ? 'ok' : '' %>"><%= u.verified %> verified</span><% } %></td>
+      <td class="n"><%= u.prefs %></td>
+      <td><span class="chip <%= u.prefs_locked ? 'ok' : '' %>"><%= u.prefs_locked ? 'Locked' : 'Draft' %></span></td></tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="8" class="muted">No applicants match.</td></tr><% } %>
+  </tbody></table></div>
+<%- include('../partials/a-bottom') %>

@@ -1,0 +1,31 @@
+<%- include('../partials/s-top') %>
+<% const locked = currentUser.prefs_locked; const done = st.requiredDocs.filter(d => st.docs[d.key] && st.docs[d.key].status === 'verified').length; %>
+<div class="grid2">
+  <div class="card" style="min-width:0">
+    <div class="panel-title"><h1>Documents</h1><span class="chip <%= done === st.requiredDocs.length ? 'ok' : 'warn' %>"><%= done %>/<%= st.requiredDocs.length %> verified</span></div>
+    <p class="small muted">PDF, JPG or PNG, up to 2 MB each. The counselling office reviews every upload. <% if (currentUser.category !== 'RES') { %>The category certificate is only needed if your category is Reserved.<% } %></p>
+    <div style="margin-top:8px">
+    <% st.requiredDocs.forEach(d => { const doc = st.docs[d.key]; const s = doc ? doc.status : 'missing';
+       const chip = { missing:['Not uploaded',''], pending:['Under review','acc'], verified:['Verified','ok'], rejected:['Re-upload needed','bad'] }[s]; %>
+      <div class="doc">
+        <div style="min-width:0"><b><%= d.name %></b>
+          <div class="small muted"><% if (doc) { %><a href="/documents/<%= doc.id %>/file" target="_blank" rel="noopener"><%= doc.filename %></a> · uploaded <%= new Date(doc.uploaded_at).toLocaleDateString('en-IN') %><% } else { %><%= d.hint %><% } %></div>
+          <% if (s === 'rejected') { %><div class="small" style="color:var(--bad);margin-top:2px">Reason: <%= doc.note %></div><% } %>
+        </div>
+        <span class="chip <%= chip[1] %>"><%= chip[0] %></span>
+        <% if (!locked && s !== 'verified') { %>
+          <form method="post" action="/documents/<%= d.key %>" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required aria-label="Choose file for <%= d.name %>">
+            <button class="btn sm <%= s === 'rejected' ? 'primary' : '' %>"><%= doc ? 'Re-upload' : 'Upload' %></button>
+          </form>
+        <% } %>
+      </div>
+    <% }) %>
+    </div>
+  </div>
+  <aside class="stack">
+    <div class="banner acc" style="margin:0"><span class="grow small"><b>All documents must be verified</b> before you can lock your preferences.</span></div>
+    <div class="card small"><h3>Scan tips</h3><ul class="checks" style="margin-top:8px"><li>Scan at 200–300 dpi so seals and roll numbers are readable.</li><li>One document per file, all pages included.</li><li>Rejected? The reason is shown next to the document.</li></ul></div>
+  </aside>
+</div>
+<%- include('../partials/s-bottom') %>

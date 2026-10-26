@@ -1,0 +1,58 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><div><h1>Colleges &amp; seat matrix</h1><p class="small muted">Seats per program: Open (All India) · Home State · Reserved.</p></div>
+  <% if (locked) { %><span class="chip ok">Frozen – reset counselling to edit</span><% } else { %><span class="chip warn">Editable</span><% } %></div>
+<div class="grid2">
+  <div class="stack" style="min-width:0">
+    <% if (!colleges.length) { %><div class="empty">No colleges yet. Add the first one on the right.</div><% } %>
+    <% colleges.forEach(c => { const tot = c.programs.reduce((a,p)=>a+p.seats_open+p.seats_home+p.seats_reserved,0); %>
+      <div class="card" id="c<%= c.id %>">
+        <div class="panel-title"><div><h3><%= c.name %></h3><span class="small muted"><%= c.city %>, <%= c.state %> · <%= c.type %> · <%= tot %> seats</span></div>
+          <% if (!locked) { %><details><summary class="small" style="color:var(--bad)">Delete</summary><form method="post" action="/admin/colleges/<%= c.id %>/delete" style="margin-top:6px"><button class="btn sm danger">Delete college and its programs</button></form></details><% } %></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Program</th><th class="n">Open</th><th class="n">Home</th><th class="n">Reserved</th><th class="n">Total</th><th></th></tr></thead>
+          <tbody>
+          <% c.programs.forEach(p => { %>
+            <tr><td><%= p.name %></td>
+              <% if (locked) { %><td class="n"><%= p.seats_open %></td><td class="n"><%= p.seats_home %></td><td class="n"><%= p.seats_reserved %></td><td class="n"><%= p.seats_open+p.seats_home+p.seats_reserved %></td><td></td>
+              <% } else { const f = 'f' + p.id; %>
+                <td class="n"><input form="<%= f %>" type="number" name="seats_open" min="0" value="<%= p.seats_open %>" aria-label="Open seats"></td>
+                <td class="n"><input form="<%= f %>" type="number" name="seats_home" min="0" value="<%= p.seats_home %>" aria-label="Home state seats"></td>
+                <td class="n"><input form="<%= f %>" type="number" name="seats_reserved" min="0" value="<%= p.seats_reserved %>" aria-label="Reserved seats"></td>
+                <td class="n"><%= p.seats_open+p.seats_home+p.seats_reserved %></td>
+                <td><div class="row" style="gap:4px;flex-wrap:nowrap"><form id="<%= f %>" method="post" action="/admin/programs/<%= p.id %>" class="inline"><button class="btn sm">Save</button></form>
+                  <form method="post" action="/admin/programs/<%= p.id %>/delete" class="inline"><button class="icon-btn" aria-label="Delete program" title="Delete program">✕</button></form></div></td>
+              <% } %></tr>
+          <% }) %>
+          <% if (!c.programs.length) { %><tr><td colspan="6" class="muted small">No programs yet.</td></tr><% } %>
+          </tbody></table></div>
+        <% if (!locked) { %>
+          <form method="post" action="/admin/programs" class="row" style="margin-top:10px">
+            <input type="hidden" name="college_id" value="<%= c.id %>">
+            <input type="text" name="name" placeholder="New program name" required style="flex:1;min-width:180px" aria-label="Program name">
+            <input type="number" name="seats_open" min="0" value="2" style="width:80px" aria-label="Open seats" title="Open">
+            <input type="number" name="seats_home" min="0" value="1" style="width:80px" aria-label="Home state seats" title="Home state">
+            <input type="number" name="seats_reserved" min="0" value="1" style="width:80px" aria-label="Reserved seats" title="Reserved">
+            <button class="btn sm">Add program</button>
+          </form>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+  <aside class="stack">
+    <% if (!locked) { %>
+    <div class="card">
+      <h3>Add a college</h3>
+      <form method="post" action="/admin/colleges" class="stack" style="gap:10px;margin-top:10px">
+        <label class="f">Name<input type="text" name="name" required></label>
+        <label class="f">City<input type="text" name="city" required></label>
+        <label class="f">State<select name="state" required><option value="">Choose…</option><% STATES.forEach(s => { %><option><%= s %></option><% }) %></select></label>
+        <label class="f">Type<select name="type"><option>Government</option><option>Private</option></select></label>
+        <label class="f">Short description (optional)<textarea name="description" rows="2"></textarea></label>
+        <button class="btn primary">Add college</button>
+      </form>
+    </div>
+    <% } %>
+    <div class="card small"><h3>SOP 1</h3><p class="muted" style="margin-top:6px">Universities verify and freeze seat counts before choice filling opens, so students never apply for incorrect seats. Freezing happens on the Counselling rounds page.</p></div>
+  </aside>
+</div>
+<%- include('../partials/a-bottom') %>

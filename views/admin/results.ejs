@@ -1,0 +1,30 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><div><h1>Results</h1><p class="small muted">Closing score = lowest merit score admitted in that quota.</p></div>
+  <div class="row"><% runs.forEach(r => { %><a class="btn sm <%= r.round===round?'primary':'' %>" href="/admin/results?round=<%= r.round %>">Round <%= r.round %></a><% }) %>
+  <% if (round) { %><a class="btn sm" href="/admin/results.csv?round=<%= round %>">Download CSV</a><% } %></div></div>
+<% if (!round) { %><div class="empty">No round has been run yet.</div><% } else { %>
+<% const seats = summary.reduce((a,s)=>a+s.seats_open+s.seats_home+s.seats_reserved,0), filled = rows.length; %>
+<div class="kpis">
+  <div class="kpi"><b class="num"><%= filled %></b><span>Seats allotted</span></div>
+  <div class="kpi"><b class="num"><%= seats - filled %></b><span>Vacant</span></div>
+  <div class="kpi"><b class="num"><%= seats ? (100*filled/seats).toFixed(1) : 0 %>%</b><span>Fill rate</span></div>
+  <div class="kpi"><b class="num"><%= run.participants %></b><span>Applicants in round</span></div>
+</div>
+<div class="card" style="margin-bottom:16px"><div class="panel-title"><h3>Result integrity</h3><span class="chip ok">No seat assigned twice</span></div>
+  <p class="small muted" style="margin-bottom:8px">SHA-256 of the sorted allotment list, recorded <%= new Date(run.run_at).toLocaleString('en-IN') %>. Same inputs always give the same hash.</p><div class="hash"><%= run.hash %></div></div>
+<h2 style="margin:6px 0 10px">Closing scores by program</h2>
+<div class="tablewrap" style="margin-bottom:20px"><table>
+  <thead><tr><th>Program</th><th class="n">Open</th><th class="n">Home</th><th class="n">Reserved</th><th class="n">Filled</th></tr></thead>
+  <tbody><% summary.forEach(s => { const cell = (v, cap) => cap === 0 ? '—' : v == null ? 'vacant' : v.toFixed(2); %>
+    <tr><td><%= s.program %><br><span class="small muted"><%= s.college %></span></td><td class="n"><%= cell(s.close_o, s.seats_open) %></td><td class="n"><%= cell(s.close_h, s.seats_home) %></td><td class="n"><%= cell(s.close_r, s.seats_reserved) %></td><td class="n"><%= s.filled %>/<%= s.seats_open+s.seats_home+s.seats_reserved %></td></tr>
+  <% }) %></tbody></table></div>
+<h2 style="margin:6px 0 10px">Allotment list</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Application</th><th>Name</th><th>College · program</th><th>Quota</th><th class="n">Score</th><th class="n">Choice</th></tr></thead>
+  <tbody><% rows.forEach(r => { %>
+    <tr><td class="mono small"><a href="/admin/applicants/<%= r.user_id %>"><%= C.appNo(r.user_id) %></a></td><td><%= r.name %><br><span class="small muted"><%= r.home_state %> · <%= r.category %></span></td>
+      <td><%= r.program %><br><span class="small muted"><%= r.college %></span></td><td><span class="chip"><%= ({O:'Open',H:'Home',R:'Reserved'})[r.quota] %></span></td>
+      <td class="n"><%= r.score.toFixed(2) %></td><td class="n"><%= r.pref_rank %></td></tr>
+  <% }) %></tbody></table></div>
+<% } %>
+<%- include('../partials/a-bottom') %>

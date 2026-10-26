@@ -1,0 +1,36 @@
+<%- include('../partials/a-top') %>
+<div class="pagehead"><div><div class="eyebrow">Counselling administrator</div><h1>Dashboard</h1></div><span class="chip cmp"><%= C.PHASES[phase] %></span></div>
+<div class="kpis">
+  <div class="kpi"><b class="num"><%= k.students %></b><span>Applicants<%= k.samples ? ' (' + k.samples + ' sample)' : '' %></span></div>
+  <div class="kpi"><b class="num"><%= k.locked %></b><span>Preferences locked</span></div>
+  <div class="kpi"><b class="num" style="<%= k.docs_pending ? 'color:var(--warn)' : '' %>"><%= k.docs_pending %></b><span>Documents to review</span></div>
+  <div class="kpi"><b class="num"><%= k.seats %></b><span>Seats in <%= k.programs %> programs</span></div>
+</div>
+<div class="grid2">
+  <div class="stack" style="min-width:0">
+    <div class="card raised">
+      <h2>Next step</h2>
+      <% if (phase === 'setup') { %>
+        <p class="muted" style="margin:6px 0 12px">Set up colleges and seat counts, verify student documents, then freeze the seat matrix to open choice filling.</p>
+        <div class="row"><a class="btn" href="/admin/colleges">Edit seat matrix</a><a class="btn primary" href="/admin/counselling">Freeze &amp; open choice filling</a></div>
+      <% } else if (phase === 'choice_filling') { %>
+        <p class="muted" style="margin:6px 0 12px"><%= k.locked %> applicants have locked preferences. Keep verifying documents; run Round 1 when choice filling should close.</p>
+        <div class="row"><a class="btn" href="/admin/applicants?filter=pending">Review documents (<%= k.docs_pending %>)</a><a class="btn primary" href="/admin/counselling">Run Round 1</a></div>
+      <% } else if (phase === 'round1') { %>
+        <p class="muted" style="margin:6px 0 12px">Round 1 is published. Students are choosing Freeze, Float, Slide or Withdraw and paying the fee. Run Round 2 when the decision window ends.</p>
+        <div class="row"><a class="btn" href="/admin/results?round=1">Round 1 results</a><a class="btn primary" href="/admin/counselling">Run Round 2</a></div>
+      <% } else { %>
+        <p class="muted" style="margin:6px 0 12px">Final allotment is published. Download the result list for colleges.</p>
+        <div class="row"><a class="btn primary" href="/admin/results?round=2">Final results</a><a class="btn" href="/admin/results.csv?round=2">Download CSV</a></div>
+      <% } %>
+    </div>
+    <div class="card"><div class="panel-title"><h3>Rounds</h3></div>
+      <% if (!runs.length) { %><p class="small muted">No rounds run yet.</p><% } %>
+      <% runs.forEach(r => { %><div class="row between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><b>Round <%= r.round %></b> · <%= new Date(r.run_at).toLocaleString('en-IN') %></span><span class="small"><%= r.allotted %> / <%= r.participants %> allotted · <span class="mono"><%= r.hash.slice(0,12) %></span></span></div><% }) %>
+    </div>
+  </div>
+  <aside class="card"><div class="panel-title"><h3>Recent activity</h3><a class="small" href="/admin/audit">All</a></div>
+    <ul class="checks small"><% audit.forEach(a => { %><li style="display:block"><span class="mono muted"><%= new Date(a.at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) %></span><br><b><%= a.action.replace(/_/g,' ') %></b> <span class="muted"><%= a.detail %></span></li><% }) %></ul>
+  </aside>
+</div>
+<%- include('../partials/a-bottom') %>

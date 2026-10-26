@@ -1,0 +1,34 @@
+<%- include('../partials/s-top') %>
+<% const canEdit = !currentUser.prefs_locked && (phase === 'setup' || phase === 'choice_filling'); %>
+<div class="panel-title"><div><h1>Colleges</h1><p class="muted small">Seats shown as Open · Home State · Reserved. Closing scores appear after a round is published.</p></div></div>
+<form method="get" class="row" style="margin-bottom:16px">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search college, city or program" style="max-width:320px" aria-label="Search">
+  <select name="state" style="max-width:200px" aria-label="State"><option value="">All states</option><% states.forEach(s => { %><option <%= state===s?'selected':'' %>><%= s %></option><% }) %></select>
+  <button class="btn">Filter</button><% if (q || state) { %><a class="btn sm" href="/colleges">Clear</a><% } %>
+</form>
+<% if (!colleges.length) { %><div class="empty">No colleges match. Try a different search.</div><% } %>
+<div class="grid3">
+<% colleges.forEach(c => { const home = c.state === currentUser.home_state; %>
+  <article class="card college">
+    <div><h3><%= c.name %></h3><p class="small muted"><%= c.city %>, <%= c.state %></p></div>
+    <div class="row" style="gap:6px"><span class="chip"><%= c.type %></span><% if (home) { %><span class="chip cmp">Your home state</span><% } %></div>
+    <% if (c.description) { %><p class="small muted"><%= c.description %></p><% } %>
+    <div>
+      <% c.programs.forEach(p => { const inP = mine.has(p.id); %>
+        <div class="prog">
+          <span><%= p.name %><% if (p.close_o != null || p.close_h != null) { %><br><span class="small muted mono">close <%= p.close_o != null ? p.close_o.toFixed(2) : '—' %> <%= home && p.close_h != null ? '· HS ' + p.close_h.toFixed(2) : '' %></span><% } %></span>
+          <span class="seats"><%= p.o %> · <%= p.h %> · <%= p.r %></span>
+          <% if (canEdit) { %>
+            <form method="post" action="<%= inP ? '/preferences/' + p.id + '/remove' : '/preferences/add' %>" class="inline">
+              <input type="hidden" name="program_id" value="<%= p.id %>"><input type="hidden" name="back" value="colleges">
+              <button class="icon-btn" title="<%= inP ? 'Remove from' : 'Add to' %> preferences" aria-label="<%= inP ? 'Remove from' : 'Add to' %> preferences" style="<%= inP ? 'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)' : 'color:var(--accent)' %>"><%= inP ? '✓' : '+' %></button>
+            </form>
+          <% } else { %><span></span><% } %>
+        </div>
+      <% }) %>
+      <% if (!c.programs.length) { %><p class="small muted">No programs listed yet.</p><% } %>
+    </div>
+  </article>
+<% }) %>
+</div>
+<%- include('../partials/s-bottom') %>

@@ -1,0 +1,23 @@
+<%- include('../partials/s-top') %>
+<section class="hero">
+  <div>
+    <div class="eyebrow">AdmissionPrefAllot · one portal for all of India</div>
+    <h1 style="margin-top:8px">Find your seat, not just a college.</h1>
+    <p class="lead">Register once, upload your documents, rank colleges and programs across every participating state, and get one seat from a single national merit list. When two applicants have the same score, the one from the college's home state gets the seat.</p>
+    <div class="row" style="margin-top:18px"><a class="btn primary" href="/register">Create an account</a><a class="btn" href="/login">I already have one</a></div>
+    <div class="stats"><div><b class="num"><%= stats.colleges %></b><span>colleges</span></div><div><b class="num"><%= stats.programs %></b><span>programs</span></div><div><b class="num"><%= stats.seats %></b><span>seats</span></div></div>
+  </div>
+  <svg viewBox="0 0 220 220" style="max-width:220px;justify-self:center" aria-hidden="true">
+    <circle cx="110" cy="110" r="100" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="110" cy="110" r="72" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>
+    <% for (let i=0;i<32;i++){ const a=i*Math.PI/16, l=i%4===0?14:6; %><line x1="<%= 110+Math.sin(a)*100 %>" y1="<%= 110-Math.cos(a)*100 %>" x2="<%= 110+Math.sin(a)*(100-l) %>" y2="<%= 110-Math.cos(a)*(100-l) %>" stroke="var(--muted)" stroke-width="<%= i%4===0?2:1 %>"/><% } %>
+    <path d="M110 22 L124 110 L110 198 L96 110Z" fill="var(--accent)"/><path d="M110 22 L124 110 L96 110Z" fill="var(--compass)"/>
+    <circle cx="110" cy="110" r="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+  </svg>
+</section>
+<div class="grid3">
+  <div class="card"><div class="eyebrow">Step 1</div><h3 style="margin:4px 0 6px">Profile & documents</h3><p class="small muted">Enter your marks and home state, and upload your marksheet, scorecard, ID and domicile certificate. The counselling office verifies each one.</p></div>
+  <div class="card"><div class="eyebrow">Step 2</div><h3 style="margin:4px 0 6px">Rank your choices</h3><p class="small muted">Browse colleges in every state and order the programs you want. Lock the list when choice filling opens.</p></div>
+  <div class="card"><div class="eyebrow">Step 3</div><h3 style="margin:4px 0 6px">Get your seat</h3><p class="small muted">After Round 1, Freeze your seat, Float or Slide for a better one, or Withdraw. Round 2 is final.</p></div>
+</div>
+<p class="small muted" style="margin-top:20px">Counselling staff: <a href="/admin/login">admin login</a></p>
+<%- include('../partials/s-bottom') %>
