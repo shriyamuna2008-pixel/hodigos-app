@@ -29,6 +29,16 @@
     </ol>
   </div>
   <aside class="stack">
+    <div class="card raised">
+      <h3>Load demo data</h3>
+      <p class="small muted" style="margin:6px 0 10px">Fills the portal for a presentation: 100 sample applicants plus two demo students, Ananya Rao and Rahul Verma. They log in with <span class="mono">ananya@demo.hodigos.in</span> / <span class="mono">rahul@demo.hodigos.in</span>, password <span class="mono">demo1234</span>.</p>
+      <form method="post" action="/admin/demo" class="stack" style="gap:8px">
+        <label class="small row" style="gap:8px;flex-wrap:nowrap;align-items:flex-start"><input type="radio" name="mode" value="live" checked> <span><b>Ready to present live:</b> Ananya's documents are waiting for review; nothing is frozen or run yet.</span></label>
+        <label class="small row" style="gap:8px;flex-wrap:nowrap;align-items:flex-start"><input type="radio" name="mode" value="finished"> <span><b>Already finished:</b> documents verified, both rounds run, seats decided and paid. Use as a backup.</span></label>
+        <label class="small row" style="gap:8px;flex-wrap:nowrap;align-items:flex-start"><input type="checkbox" name="confirm" value="yes"> <span>I understand this resets the rounds and replaces sample and demo accounts.</span></label>
+        <button class="btn primary sm">Load demo data</button>
+      </form>
+    </div>
     <div class="card">
       <h3>Sample applicants</h3>
       <p class="small muted" style="margin:6px 0 10px">Add test applicants with verified documents and locked preferences so rounds have competition. <%= k.samples %> currently.</p>

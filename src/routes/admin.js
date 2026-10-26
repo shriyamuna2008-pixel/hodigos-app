@@ -5,6 +5,7 @@ const { ah, flash, requireAdmin, studentStatus } = require('../helpers');
 const { STATES, DOC_TYPES, PHASES, SEAT_FEE, meritScore, appNo } = require('../constants');
 const { runRound } = require('../allotment');
 const { createSampleApplicants } = require('../seed');
+const { loadDemo, DEMO_PASSWORD, DEMO_DOMAIN } = require('../demo');
 
 const router = express.Router();
 const actor = res => 'admin:' + res.locals.currentUser.email;
@@ -212,6 +213,16 @@ router.post('/counselling/samples/delete', ah(async (req, res) => {
   const r = await db.query('DELETE FROM users WHERE is_sample'); await db.audit(actor(res), 'delete_sample_applicants', String(r.rowCount));
   flash(req, 'ok', `${r.rowCount} sample applicants removed.`);
   res.redirect('/admin/counselling');
+}));
+
+router.post('/demo', ah(async (req, res) => {
+  const mode = req.body.mode === 'finished' ? 'finished' : 'live';
+  if (req.body.confirm !== 'yes') { flash(req, 'bad', 'Tick the box to confirm. Loading demo data resets the counselling rounds.'); return res.redirect('/admin/counselling'); }
+  await loadDemo(mode, actor(res));
+  flash(req, 'ok', mode === 'finished'
+    ? `Finished demo loaded: both rounds are done. Student logins: ananya${DEMO_DOMAIN} and rahul${DEMO_DOMAIN}, password ${DEMO_PASSWORD}.`
+    : `Live demo loaded. Ananya's documents are waiting for you to verify. Student logins: ananya${DEMO_DOMAIN} and rahul${DEMO_DOMAIN}, password ${DEMO_PASSWORD}.`);
+  res.redirect(mode === 'finished' ? '/admin/results?round=2' : '/admin/counselling');
 }));
 
 /* ---------------- Results ---------------- */
